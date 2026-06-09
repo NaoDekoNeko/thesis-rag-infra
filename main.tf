@@ -37,3 +37,9 @@ module "gcs_sites" {
   site_name   = each.key
   ci_sa_email = module.iam.docsite_ci_sa_emails[each.key]
 }
+
+module "lb" {
+  source     = "./modules/lb"
+  project_id = var.project_id
+  sites      = { for k, v in module.gcs_sites : k => v.bucket_name }
+}

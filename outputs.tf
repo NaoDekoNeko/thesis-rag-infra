@@ -38,3 +38,13 @@ output "artifact_registry_image_base" {
   description = "Base URL para imágenes Docker en Artifact Registry"
   value       = "${module.iam.artifact_registry_repo}/microservice"
 }
+
+output "lb_ip" {
+  description = "IP del Load Balancer HTTP con Cloud CDN"
+  value       = module.lb.ip
+}
+
+output "docsite_urls" {
+  description = "URLs de los docsites vía LB+CDN"
+  value       = module.lb.site_urls
+}
