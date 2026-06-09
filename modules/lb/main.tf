@@ -32,11 +32,6 @@ resource "google_compute_url_map" "lb" {
         match_rules {
           prefix_match = "/${route_rules.key}/"
         }
-        route_action {
-          url_rewrite {
-            path_prefix_rewrite = "/"
-          }
-        }
         service = google_compute_backend_bucket.site[route_rules.key].self_link
       }
     }
