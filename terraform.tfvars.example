@@ -1,0 +1,7 @@
+# Copiar a terraform.tfvars (gitignoreado) y completar valores reales
+project_id         = "mi-proyecto-gcp"
+region             = "us-central1"
+microservice_image = "gcr.io/mi-proyecto-gcp/thesis-rag-microservice:latest"
+gemini_api_key     = "AIza..."
+github_org         = "NaoDekoNeko"
+docsite_repos      = ["thesis-doc-test-1", "thesis-doc-test-2"]

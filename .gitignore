@@ -1,0 +1,19 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!terraform.tfvars.example
+crash.log
+*.tfplan
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Backups
+*.bkp
+*.bak
+*.orig
+*~
