@@ -40,6 +40,14 @@ resource "google_project_iam_member" "docsite_ci_sql_client" {
   member  = "serviceAccount:${google_service_account.docsite_ci[each.key].email}"
 }
 
+resource "google_project_iam_member" "docsite_ci_lb_admin" {
+  for_each = toset(var.docsite_repos)
+
+  project = var.project_id
+  role    = "roles/compute.loadBalancerAdmin"
+  member  = "serviceAccount:${google_service_account.docsite_ci[each.key].email}"
+}
+
 # Permite que el WIF del repo de infra impersone los SAs de docsite CI
 # (El WIF pool ya fue creado en bootstrap.sh)
 resource "google_service_account_iam_member" "docsite_ci_wif" {
