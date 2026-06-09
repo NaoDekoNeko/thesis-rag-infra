@@ -9,9 +9,8 @@ WIF_PROVIDER="projects/776539408797/locations/global/workloadIdentityPools/githu
 PROJECT_ID="thesis-rag-poc"
 REGION="us-central1"
 
-# ── Pedir valores que no están en código ──────────────────────────────────────
+# ── Pedir valores que no están en Terraform ───────────────────────────────────
 read -rsp "GEMINI_API_KEY: " GEMINI_API_KEY; echo
-read -rsp "DB_PASSWORD (terraform output -raw db_password): " DB_PASSWORD; echo
 
 # ── Leer outputs de Terraform ─────────────────────────────────────────────────
 TF_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -25,6 +24,7 @@ DOC2_SA=$(terraform output -json docsite_ci_sa_emails 2>/dev/null | jq -r '.["th
 DOC1_BUCKET=$(terraform output -json docsite_bucket_names 2>/dev/null | jq -r '.["thesis-doc-test-1"]')
 DOC2_BUCKET=$(terraform output -json docsite_bucket_names 2>/dev/null | jq -r '.["thesis-doc-test-2"]')
 DB_INSTANCE=$(terraform output -raw db_connection_name 2>/dev/null)
+DB_PASSWORD=$(terraform output -raw db_password 2>/dev/null)
 
 popd > /dev/null
 
