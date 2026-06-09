@@ -30,6 +30,7 @@ gcloud services enable \
   run.googleapis.com \
   storage.googleapis.com \
   artifactregistry.googleapis.com \
+  compute.googleapis.com \
   --project="$PROJECT_ID"
 
 echo ">>> Creando bucket de estado Terraform: $TF_STATE_BUCKET"
