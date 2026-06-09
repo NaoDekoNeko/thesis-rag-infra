@@ -24,7 +24,17 @@ output "microservice_sa_email" {
   value       = module.iam.microservice_sa_email
 }
 
+output "microservice_ci_sa_email" {
+  description = "SA de CI/CD del microservicio (para WIF_SERVICE_ACCOUNT en ese repo)"
+  value       = module.iam.microservice_ci_sa_email
+}
+
 output "docsite_ci_sa_emails" {
   description = "SAs de CI/CD de docsites (key = repo name)"
   value       = module.iam.docsite_ci_sa_emails
+}
+
+output "artifact_registry_image_base" {
+  description = "Base URL para imágenes Docker en Artifact Registry"
+  value       = "${module.iam.artifact_registry_repo}/microservice"
 }

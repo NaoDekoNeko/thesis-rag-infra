@@ -22,11 +22,6 @@ resource "google_sql_database_instance" "main" {
       ipv4_enabled = true
     }
 
-    database_flags {
-      # pgvector se activa con CREATE EXTENSION vector; vía migración NestJS
-      name  = "cloudsql.enable_pgvector"
-      value = "on"
-    }
   }
 
   deletion_protection = false

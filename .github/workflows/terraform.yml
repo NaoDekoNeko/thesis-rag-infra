@@ -1,10 +1,6 @@
 name: Terraform
 
 on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
   workflow_dispatch:
     inputs:
       action:
@@ -19,7 +15,7 @@ permissions:
   pull-requests: write  # para postear plan como comentario en PRs
 
 env:
-  TF_VERSION: "1.9.8"
+  TF_VERSION: "1.15.2"
   TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
   TF_VAR_region: ${{ secrets.GCP_REGION }}
   TF_VAR_microservice_image: ${{ secrets.MICROSERVICE_IMAGE }}
@@ -38,7 +34,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Evaluar usuario autorizado
+        id: authz
+        run: |
+          if [ "${{ github.actor }}" = "NaoDekoNeko" ]; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+            echo "Usuario autorizado para ejecuciones con permisos de despliegue."
+          else
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+            echo "Se omitirán los pasos con permisos de despliegue para ${{ github.actor }}."
+          fi
+
       - name: Autenticar en GCP (OIDC)
+        if: steps.authz.outputs.allowed == 'true'
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
@@ -97,17 +105,17 @@ jobs:
             });
 
       - name: terraform apply
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.inputs.action == 'apply'
-        run: terraform apply -auto-approve -input=false tfplan
+        if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.inputs.action == 'apply')
+        run: terraform apply -auto-approve -input=false
 
       - name: terraform destroy
-        if: github.event.inputs.action == 'destroy'
+        if: steps.authz.outputs.allowed == 'true' && github.event.inputs.action == 'destroy'
         run: terraform destroy -auto-approve -input=false
         env:
           TF_VAR_github_org: ${{ github.repository_owner }}
 
       - name: Exportar outputs al job summary
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event.inputs.action == 'apply'
+        if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event.inputs.action == 'apply')
         run: |
           echo "## Terraform Outputs" >> $GITHUB_STEP_SUMMARY
           terraform output -json | jq -r 'to_entries[] | "- **\(.key)**: \(.value.value)"' >> $GITHUB_STEP_SUMMARY
