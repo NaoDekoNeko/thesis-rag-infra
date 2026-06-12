@@ -1,8 +1,9 @@
 resource "google_cloud_run_v2_service" "microservice" {
-  project  = var.project_id
-  name     = "thesis-rag-microservice"
-  location = var.region
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  project             = var.project_id
+  name                = "thesis-rag-microservice"
+  location            = var.region
+  ingress             = "INGRESS_TRAFFIC_ALL"
+  deletion_protection = false
 
   template {
     service_account = var.service_account
