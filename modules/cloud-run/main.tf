@@ -104,7 +104,10 @@ resource "google_secret_manager_secret_version" "db_password" {
 resource "google_secret_manager_secret" "db_superuser_password" {
   project   = var.project_id
   secret_id = "thesis-rag-db-superuser-password"
-  replication { auto {} }
+
+  replication {
+    auto {}
+  }
 }
 
 resource "google_secret_manager_secret_version" "db_superuser_password" {

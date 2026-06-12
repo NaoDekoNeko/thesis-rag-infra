@@ -41,7 +41,7 @@ variable "microservice_domain" {
 variable "site_domains" {
   description = "Map de site_name => subdominio completo"
   type        = map(string)
-  default     = {
+  default = {
     "thesis-doc-test-1" = "platform-eng.naodeko.site"
     "thesis-doc-test-2" = "software-arch.naodeko.site"
   }

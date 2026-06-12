@@ -25,7 +25,7 @@ DOC1_BUCKET=$(terraform output -json docsite_bucket_names 2>/dev/null | jq -r '.
 DOC2_BUCKET=$(terraform output -json docsite_bucket_names 2>/dev/null | jq -r '.["thesis-doc-test-2"]')
 DB_INSTANCE=$(terraform output -raw db_connection_name 2>/dev/null)
 DB_PASSWORD=$(terraform output -raw db_password 2>/dev/null)
-MICROSERVICE_URL=$(terraform output -raw microservice_url 2>/dev/null)
+MICROSERVICE_URL="https://api.naodeko.site"
 
 popd > /dev/null
 
