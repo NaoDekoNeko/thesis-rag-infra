@@ -46,3 +46,14 @@ module "lb" {
   sites      = { for k, v in module.gcs_sites : k => v.bucket_name }
   domains    = var.site_domains
 }
+
+resource "google_dns_record_set" "docsite" {
+  for_each = var.site_domains
+
+  project      = var.project_id
+  managed_zone = var.dns_zone_name
+  name         = "${each.value}."
+  type         = "A"
+  ttl          = 300
+  rrdatas      = [module.lb.ip]
+}

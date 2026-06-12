@@ -38,6 +38,12 @@ variable "microservice_domain" {
   default     = "api.naodeko.site"
 }
 
+variable "dns_zone_name" {
+  description = "Nombre de la zona Cloud DNS que gestiona naodeko.site"
+  type        = string
+  default     = "naodeko-site"
+}
+
 variable "site_domains" {
   description = "Map de site_name => subdominio completo"
   type        = map(string)
