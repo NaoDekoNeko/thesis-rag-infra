@@ -14,10 +14,7 @@ output "summary" {
     | 📗 Software Architecture | ${module.lb.site_urls["thesis-doc-test-2"]} |
 
     ## ⚙️ Próximos pasos
-    1. Agregar registros DNS en DonWeb:
-       platform-eng  A  ${module.lb.ip}
-       software-arch A  ${module.lb.ip}
-    2. Configurar GitHub Secrets:
+    1. Configurar GitHub Secrets:
        bash scripts/set-github-secrets.sh
   EOT
 }
@@ -29,7 +26,7 @@ output "lb_ip" {
 
 output "microservice_url" {
   description = "URL pública del microservicio en Cloud Run"
-  value       = module.cloud_run.url
+  value       = module.lb.microservice_url
 }
 
 # ── Usados por set-github-secrets.sh (no editar) ──────────────────────────────

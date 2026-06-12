@@ -28,7 +28,6 @@ module "cloud_run" {
   db_password           = module.cloud_sql.db_password
   db_superuser_password = module.cloud_sql.db_superuser_password
   gemini_api_key        = var.gemini_api_key
-  custom_domain         = var.microservice_domain
 }
 
 module "gcs_sites" {
@@ -41,10 +40,13 @@ module "gcs_sites" {
 }
 
 module "lb" {
-  source     = "./modules/lb"
-  project_id = var.project_id
-  sites      = { for k, v in module.gcs_sites : k => v.bucket_name }
-  domains    = var.site_domains
+  source              = "./modules/lb"
+  project_id          = var.project_id
+  region              = var.region
+  sites               = { for k, v in module.gcs_sites : k => v.bucket_name }
+  domains             = var.site_domains
+  microservice_name   = module.cloud_run.service_name
+  microservice_domain = var.microservice_domain
 }
 
 resource "google_dns_record_set" "docsite" {
@@ -53,6 +55,15 @@ resource "google_dns_record_set" "docsite" {
   project      = var.project_id
   managed_zone = var.dns_zone_name
   name         = "${each.value}."
+  type         = "A"
+  ttl          = 300
+  rrdatas      = [module.lb.ip]
+}
+
+resource "google_dns_record_set" "api" {
+  project      = var.project_id
+  managed_zone = var.dns_zone_name
+  name         = "${var.microservice_domain}."
   type         = "A"
   ttl          = 300
   rrdatas      = [module.lb.ip]

@@ -11,12 +11,43 @@ resource "google_compute_backend_bucket" "site" {
   enable_cdn  = true
 }
 
-# Google-managed SSL cert — free, auto-renew
+# Serverless NEG → Cloud Run microservice
+resource "google_compute_region_network_endpoint_group" "microservice" {
+  project               = var.project_id
+  name                  = "thesis-rag-microservice-neg"
+  network_endpoint_type = "SERVERLESS"
+  region                = var.region
+
+  cloud_run {
+    service = var.microservice_name
+  }
+}
+
+resource "google_compute_backend_service" "microservice" {
+  project  = var.project_id
+  name     = "thesis-rag-microservice-backend"
+  protocol = "HTTPS"
+
+  backend {
+    group = google_compute_region_network_endpoint_group.microservice.id
+  }
+}
+
+# SSL cert para docsites — cert separado para no reprovisionar si cambia api
 resource "google_compute_managed_ssl_certificate" "sites" {
   project = var.project_id
   name    = "thesis-rag-ssl"
   managed {
     domains = [for domain in values(var.domains) : "${domain}."]
+  }
+}
+
+# SSL cert para el microservicio
+resource "google_compute_managed_ssl_certificate" "api" {
+  project = var.project_id
+  name    = "thesis-rag-api-ssl"
+  managed {
+    domains = ["${var.microservice_domain}."]
   }
 }
 
@@ -34,6 +65,11 @@ resource "google_compute_url_map" "lb" {
     }
   }
 
+  host_rule {
+    hosts        = [var.microservice_domain]
+    path_matcher = "microservice"
+  }
+
   dynamic "path_matcher" {
     for_each = var.domains
     content {
@@ -41,13 +77,21 @@ resource "google_compute_url_map" "lb" {
       default_service = google_compute_backend_bucket.site[path_matcher.key].self_link
     }
   }
+
+  path_matcher {
+    name            = "microservice"
+    default_service = google_compute_backend_service.microservice.self_link
+  }
 }
 
 resource "google_compute_target_https_proxy" "lb" {
-  project          = var.project_id
-  name             = "thesis-rag-lb-https-proxy"
-  url_map          = google_compute_url_map.lb.self_link
-  ssl_certificates = [google_compute_managed_ssl_certificate.sites.self_link]
+  project = var.project_id
+  name    = "thesis-rag-lb-https-proxy"
+  url_map = google_compute_url_map.lb.self_link
+  ssl_certificates = [
+    google_compute_managed_ssl_certificate.sites.self_link,
+    google_compute_managed_ssl_certificate.api.self_link,
+  ]
 }
 
 resource "google_compute_global_forwarding_rule" "lb_https" {

@@ -5,3 +5,7 @@ output "ip" {
 output "site_urls" {
   value = { for name, domain in var.domains : name => "https://${domain}" }
 }
+
+output "microservice_url" {
+  value = "https://${var.microservice_domain}"
+}
