@@ -42,4 +42,5 @@ module "lb" {
   source     = "./modules/lb"
   project_id = var.project_id
   sites      = { for k, v in module.gcs_sites : k => v.bucket_name }
+  domains    = var.site_domains
 }
