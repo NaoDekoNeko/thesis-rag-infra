@@ -126,6 +126,21 @@ resource "google_secret_manager_secret_version" "gemini_api_key" {
   secret_data = var.gemini_api_key
 }
 
+resource "google_cloud_run_domain_mapping" "microservice" {
+  count    = var.custom_domain != "" ? 1 : 0
+  project  = var.project_id
+  location = var.region
+  name     = var.custom_domain
+
+  metadata {
+    namespace = var.project_id
+  }
+
+  spec {
+    route_name = google_cloud_run_v2_service.microservice.name
+  }
+}
+
 # Acceso público (el microservicio es una API sin auth propia en PoC)
 resource "google_cloud_run_v2_service_iam_member" "public" {
   project  = var.project_id

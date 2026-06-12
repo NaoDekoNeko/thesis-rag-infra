@@ -27,7 +27,8 @@ module "cloud_run" {
   db_user            = module.cloud_sql.db_user
   db_password           = module.cloud_sql.db_password
   db_superuser_password = module.cloud_sql.db_superuser_password
-  gemini_api_key     = var.gemini_api_key
+  gemini_api_key        = var.gemini_api_key
+  custom_domain         = var.microservice_domain
 }
 
 module "gcs_sites" {

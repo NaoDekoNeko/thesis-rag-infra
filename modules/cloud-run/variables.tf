@@ -43,6 +43,12 @@ variable "gemini_api_key" {
   sensitive = true
 }
 
+variable "custom_domain" {
+  description = "Subdominio personalizado para el microservicio (e.g. api.naodeko.site)"
+  type        = string
+  default     = ""
+}
+
 variable "min_instances" {
   type    = number
   default = 0

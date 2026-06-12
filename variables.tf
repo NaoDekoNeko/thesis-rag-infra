@@ -32,6 +32,12 @@ variable "github_org" {
   default     = "NaoDekoNeko"
 }
 
+variable "microservice_domain" {
+  description = "Subdominio para el microservicio RAG (e.g. api.naodeko.site)"
+  type        = string
+  default     = "api.naodeko.site"
+}
+
 variable "site_domains" {
   description = "Map de site_name => subdominio completo"
   type        = map(string)

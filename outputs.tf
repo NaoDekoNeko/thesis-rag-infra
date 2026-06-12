@@ -9,7 +9,7 @@ output "summary" {
     ## 🔗 URLs
     | Servicio | URL |
     |----------|-----|
-    | 🤖 Microservicio RAG | ${module.cloud_run.url} |
+    | 🤖 Microservicio RAG | https://${var.microservice_domain} |
     | 📘 Platform Engineering | ${module.lb.site_urls["thesis-doc-test-1"]} |
     | 📗 Software Architecture | ${module.lb.site_urls["thesis-doc-test-2"]} |
 
