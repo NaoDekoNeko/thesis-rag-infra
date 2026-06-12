@@ -57,6 +57,15 @@ resource "google_cloud_run_v2_service" "microservice" {
         }
       }
       env {
+        name = "DB_SUPERUSER_PASSWORD"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.db_superuser_password.secret_id
+            version = "latest"
+          }
+        }
+      }
+      env {
         name = "GEMINI_API_KEY"
         value_source {
           secret_key_ref {
@@ -90,6 +99,17 @@ resource "google_secret_manager_secret" "db_password" {
 resource "google_secret_manager_secret_version" "db_password" {
   secret      = google_secret_manager_secret.db_password.id
   secret_data = var.db_password
+}
+
+resource "google_secret_manager_secret" "db_superuser_password" {
+  project   = var.project_id
+  secret_id = "thesis-rag-db-superuser-password"
+  replication { auto {} }
+}
+
+resource "google_secret_manager_secret_version" "db_superuser_password" {
+  secret      = google_secret_manager_secret.db_superuser_password.id
+  secret_data = var.db_superuser_password
 }
 
 resource "google_secret_manager_secret" "gemini_api_key" {

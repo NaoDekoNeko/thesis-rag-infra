@@ -18,3 +18,8 @@ output "db_password" {
   value     = random_password.db.result
   sensitive = true
 }
+
+output "db_superuser_password" {
+  value     = random_password.postgres.result
+  sensitive = true
+}

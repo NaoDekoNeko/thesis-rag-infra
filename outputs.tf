@@ -10,18 +10,15 @@ output "summary" {
     | Servicio | URL |
     |----------|-----|
     | 🤖 Microservicio RAG | ${module.cloud_run.url} |
-    | 📘 Platform Engineering Docs | ${module.lb.site_urls["thesis-doc-test-1"]} |
-    | 📗 Software Architecture Docs | ${module.lb.site_urls["thesis-doc-test-2"]} |
+    | 📘 Platform Engineering | ${module.lb.site_urls["thesis-doc-test-1"]} |
+    | 📗 Software Architecture | ${module.lb.site_urls["thesis-doc-test-2"]} |
 
     ## ⚙️ Próximos pasos
-    1. Actualizar `docusaurus.config.ts` en ambos repos:
-       ```
-       url: "http://${module.lb.ip}"
-       ```
+    1. Agregar registros DNS en DonWeb:
+       platform-eng  A  ${module.lb.ip}
+       software-arch A  ${module.lb.ip}
     2. Configurar GitHub Secrets:
-       ```
        bash scripts/set-github-secrets.sh
-       ```
   EOT
 }
 
@@ -59,5 +56,10 @@ output "db_connection_name" {
 
 output "db_password" {
   value     = module.cloud_sql.db_password
+  sensitive = true
+}
+
+output "db_superuser_password" {
+  value     = module.cloud_sql.db_superuser_password
   sensitive = true
 }

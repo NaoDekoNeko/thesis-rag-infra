@@ -25,6 +25,7 @@ DOC1_BUCKET=$(terraform output -json docsite_bucket_names 2>/dev/null | jq -r '.
 DOC2_BUCKET=$(terraform output -json docsite_bucket_names 2>/dev/null | jq -r '.["thesis-doc-test-2"]')
 DB_INSTANCE=$(terraform output -raw db_connection_name 2>/dev/null)
 DB_PASSWORD=$(terraform output -raw db_password 2>/dev/null)
+MICROSERVICE_URL=$(terraform output -raw microservice_url 2>/dev/null)
 
 popd > /dev/null
 
@@ -63,6 +64,7 @@ set_secret thesis-doc-test-1 DB_INSTANCE         "$DB_INSTANCE"
 set_secret thesis-doc-test-1 DB_NAME             "ragdb"
 set_secret thesis-doc-test-1 DB_USER             "raguser"
 set_secret thesis-doc-test-1 DB_PASSWORD         "$DB_PASSWORD"
+set_secret thesis-doc-test-1 MICROSERVICE_URL    "$MICROSERVICE_URL"
 
 # ── thesis-doc-test-2 ─────────────────────────────────────────────────────────
 echo "==> thesis-doc-test-2"
@@ -76,6 +78,7 @@ set_secret thesis-doc-test-2 DB_INSTANCE         "$DB_INSTANCE"
 set_secret thesis-doc-test-2 DB_NAME             "ragdb"
 set_secret thesis-doc-test-2 DB_USER             "raguser"
 set_secret thesis-doc-test-2 DB_PASSWORD         "$DB_PASSWORD"
+set_secret thesis-doc-test-2 MICROSERVICE_URL    "$MICROSERVICE_URL"
 
 echo ""
 echo "Secretos configurados en los 4 repos."
