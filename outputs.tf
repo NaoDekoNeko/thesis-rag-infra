@@ -12,10 +12,6 @@ output "summary" {
     | 🤖 Microservicio RAG | https://${var.microservice_domain} |
     | 📘 Platform Engineering | ${module.lb.site_urls["thesis-doc-test-1"]} |
     | 📗 Software Architecture | ${module.lb.site_urls["thesis-doc-test-2"]} |
-
-    ## ⚙️ Próximos pasos
-    1. Configurar GitHub Secrets:
-       bash scripts/set-github-secrets.sh
   EOT
 }
 
@@ -30,10 +26,6 @@ output "microservice_url" {
 }
 
 # ── Usados por set-github-secrets.sh (no editar) ──────────────────────────────
-
-output "artifact_registry_image_base" {
-  value = "${module.iam.artifact_registry_repo}/microservice"
-}
 
 output "microservice_ci_sa_email" {
   value = module.iam.microservice_ci_sa_email

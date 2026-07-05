@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Configura todos los GitHub Secrets de los 4 repos del proyecto.
-# Ejecutar DESPUÉS del primer terraform apply (algunos valores vienen de outputs).
-# Requiere: gh autenticado (gh auth login)
+# Lo corre automáticamente el job propagate-secrets de terraform.yml
+# después de cada apply. Solo hace falta correrlo a mano para debug
+# puntual; en ese caso requiere gh autenticado (gh auth login).
 set -euo pipefail
 
 ORG="NaoDekoNeko"
