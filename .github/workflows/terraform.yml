@@ -11,8 +11,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write       # necesario para OIDC
-  pull-requests: write  # para postear plan como comentario en PRs
+  id-token: write # necesario para OIDC
 
 env:
   TF_VERSION: "1.15.2"
@@ -24,6 +23,8 @@ jobs:
   terraform:
     name: Terraform ${{ github.event.inputs.action || (github.event_name == 'pull_request' && 'plan') || 'apply' }}
     runs-on: ubuntu-latest
+    outputs:
+      applied: ${{ steps.apply.outcome }}
 
     defaults:
       run:
@@ -79,49 +80,10 @@ jobs:
         env:
           TF_VAR_github_org: ${{ github.repository_owner }}
 
-      - name: Publicar plan en PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const output = `#### Terraform Plan \`${{ steps.plan.outcome }}\`
-
-            <details><summary>Ver plan</summary>
-
-            \`\`\`
-            ${{ steps.plan.outputs.stdout }}
-            \`\`\`
-
-            </details>
-
-            *Ejecutado por @${{ github.actor }} en \`${{ github.ref_name }}\`*`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            });
-
       - name: terraform apply
+        id: apply
         if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.inputs.action == 'apply')
         run: terraform apply -auto-approve -input=false
-
-      - name: Generar token de la GitHub App
-        id: app-token
-        if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.inputs.action == 'apply')
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          repositories: thesis-rag-infra,thesis-rag-microservice,thesis-doc-test-1,thesis-doc-test-2
-
-      - name: Propagar GitHub Secrets a repos dependientes
-        if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.inputs.action == 'apply')
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: bash scripts/set-github-secrets.sh
 
       - name: terraform destroy
         if: steps.authz.outputs.allowed == 'true' && github.event.inputs.action == 'destroy'
@@ -134,3 +96,44 @@ jobs:
         run: |
           echo "## Terraform Outputs" >> $GITHUB_STEP_SUMMARY
           terraform output -json | jq -r 'to_entries[] | "- **\(.key)**: \(.value.value)"' >> $GITHUB_STEP_SUMMARY
+
+  propagate-secrets:
+    name: Propagar GitHub Secrets a repos dependientes
+    needs: terraform
+    if: needs.terraform.outputs.applied == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Autenticar en GCP (OIDC)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -input=false
+
+      - name: Generar token de la GitHub App
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: thesis-rag-infra,thesis-rag-microservice,thesis-doc-test-1,thesis-doc-test-2
+
+      - name: Propagar GitHub Secrets
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: bash scripts/set-github-secrets.sh
