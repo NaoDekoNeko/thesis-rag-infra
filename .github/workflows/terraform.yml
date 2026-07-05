@@ -18,7 +18,6 @@ env:
   TF_VERSION: "1.15.2"
   TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
   TF_VAR_region: ${{ secrets.GCP_REGION }}
-  TF_VAR_microservice_image: ${{ secrets.MICROSERVICE_IMAGE }}
   TF_VAR_gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
 
 jobs:
@@ -107,6 +106,22 @@ jobs:
       - name: terraform apply
         if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.inputs.action == 'apply')
         run: terraform apply -auto-approve -input=false
+
+      - name: Generar token de la GitHub App
+        id: app-token
+        if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.inputs.action == 'apply')
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          repositories: thesis-rag-infra,thesis-rag-microservice,thesis-doc-test-1,thesis-doc-test-2
+
+      - name: Propagar GitHub Secrets a repos dependientes
+        if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/master') || github.event.inputs.action == 'apply')
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: bash scripts/set-github-secrets.sh
 
       - name: terraform destroy
         if: steps.authz.outputs.allowed == 'true' && github.event.inputs.action == 'destroy'

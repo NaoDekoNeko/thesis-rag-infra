@@ -10,7 +10,11 @@ PROJECT_ID="thesis-rag-poc"
 REGION="us-central1"
 
 # ── Pedir valores que no están en Terraform ───────────────────────────────────
-read -rsp "GEMINI_API_KEY: " GEMINI_API_KEY; echo
+# ponytail: si ya viene por env (ej. corrida en CI), no preguntar
+GEMINI_API_KEY="${GEMINI_API_KEY:-}"
+if [ -z "$GEMINI_API_KEY" ]; then
+  read -rsp "GEMINI_API_KEY: " GEMINI_API_KEY; echo
+fi
 
 # ── Leer outputs de Terraform ─────────────────────────────────────────────────
 TF_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -18,7 +22,6 @@ pushd "$TF_DIR" > /dev/null
 
 TF_STATE_BUCKET="${PROJECT_ID}-tfstate"
 MICROSERVICE_CI_SA=$(terraform output -raw microservice_ci_sa_email 2>/dev/null)
-AR_IMAGE_BASE=$(terraform output -raw artifact_registry_image_base 2>/dev/null)
 DOC1_SA=$(terraform output -json docsite_ci_sa_emails 2>/dev/null | jq -r '.["thesis-doc-test-1"]')
 DOC2_SA=$(terraform output -json docsite_ci_sa_emails 2>/dev/null | jq -r '.["thesis-doc-test-2"]')
 DOC1_BUCKET=$(terraform output -json docsite_bucket_names 2>/dev/null | jq -r '.["thesis-doc-test-1"]')
@@ -42,7 +45,6 @@ set_secret thesis-rag-infra GCP_REGION            "$REGION"
 set_secret thesis-rag-infra TF_STATE_BUCKET        "$TF_STATE_BUCKET"
 set_secret thesis-rag-infra WIF_PROVIDER           "$WIF_PROVIDER"
 set_secret thesis-rag-infra WIF_SERVICE_ACCOUNT    "terraform-deployer@${PROJECT_ID}.iam.gserviceaccount.com"
-set_secret thesis-rag-infra MICROSERVICE_IMAGE     "${AR_IMAGE_BASE}:latest"
 set_secret thesis-rag-infra GEMINI_API_KEY         "$GEMINI_API_KEY"
 
 # ── thesis-rag-microservice ───────────────────────────────────────────────────
