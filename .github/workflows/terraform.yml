@@ -95,7 +95,7 @@ jobs:
         if: steps.authz.outputs.allowed == 'true' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event.inputs.action == 'apply')
         run: |
           echo "## Terraform Outputs" >> $GITHUB_STEP_SUMMARY
-          terraform output -json | jq -r 'to_entries[] | "- **\(.key)**: \(.value.value)"' >> $GITHUB_STEP_SUMMARY
+          terraform output -json | jq -r 'to_entries[] | select(.value.sensitive != true) | "- **\(.key)**: \(.value.value)"' >> $GITHUB_STEP_SUMMARY
 
   propagate-secrets:
     name: Propagar GitHub Secrets a repos dependientes
