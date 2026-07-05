@@ -20,7 +20,6 @@ module "cloud_run" {
 
   project_id            = var.project_id
   region                = var.region
-  image                 = var.microservice_image
   service_account       = module.iam.microservice_sa_email
   db_connection_name    = module.cloud_sql.connection_name
   db_name               = module.cloud_sql.db_name

@@ -85,6 +85,13 @@ resource "google_cloud_run_v2_service" "microservice" {
       }
     }
   }
+
+  # ponytail: la imagen real la despliega el CD del microservicio via
+  # deploy-cloudrun directamente sobre el servicio; si Terraform no la
+  # ignora, cada apply de infra la revertiría al placeholder/secret
+  lifecycle {
+    ignore_changes = [template[0].containers[0].image]
+  }
 }
 
 resource "google_secret_manager_secret" "db_password" {

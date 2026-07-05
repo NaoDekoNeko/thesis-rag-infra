@@ -9,11 +9,6 @@ variable "region" {
   default     = "us-central1"
 }
 
-variable "microservice_image" {
-  description = "Imagen Docker del microservicio NestJS (e.g. gcr.io/PROJECT/thesis-rag-microservice:latest)"
-  type        = string
-}
-
 variable "gemini_api_key" {
   description = "API key de Gemini para embeddings"
   type        = string

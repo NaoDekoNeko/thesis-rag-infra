@@ -9,6 +9,7 @@ variable "region" {
 variable "image" {
   description = "Imagen Docker del microservicio"
   type        = string
+  default     = "us-docker.pkg.dev/cloudrun/container/hello"
 }
 
 variable "service_account" {
