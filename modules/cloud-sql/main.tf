@@ -31,6 +31,10 @@ resource "google_sql_database" "main" {
   project  = var.project_id
   instance = google_sql_database_instance.main.name
   name     = var.db_name
+
+  # ponytail: fuerza que la BD se destruya antes que los roles, porque
+  # DROP ROLE falla si aún quedan objetos de ragdb de los que es dueño
+  depends_on = [google_sql_user.main, google_sql_user.postgres]
 }
 
 resource "google_sql_user" "main" {
