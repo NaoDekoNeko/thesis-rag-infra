@@ -21,7 +21,7 @@ env:
 
 jobs:
   terraform:
-    name: Terraform ${{ github.event.inputs.action || (github.event_name == 'pull_request' && 'plan') || 'apply' }}
+    name: Terraform ${{ github.event.inputs.action || 'apply' }}
     runs-on: ubuntu-latest
     outputs:
       applied: ${{ steps.apply.outcome }}
@@ -75,7 +75,7 @@ jobs:
 
       - name: terraform plan
         id: plan
-        if: github.event_name == 'pull_request' || github.event.inputs.action == 'plan' || github.event_name == 'push'
+        if: github.event.inputs.action == 'plan' || github.event_name == 'push'
         run: terraform plan -out=tfplan -input=false
         env:
           TF_VAR_github_org: ${{ github.repository_owner }}
